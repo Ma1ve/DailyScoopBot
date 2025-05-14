@@ -1,0 +1,30 @@
+name: Telegram Bot
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  send_news:
+    runs-on: ubuntu-latest
+    environment: ENV
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.17.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Telegram Bot
+        run: node index.js
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          NEWS_URL_MOSCOW: ${{ secrets.NEWS_URL_MOSCOW }}
+          BASE_NEWS_URL: ${{ secrets.BASE_NEWS_URL }}

@@ -8,7 +8,7 @@ require('dotenv').config();
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const chatId = process.env.CHAT_ID;
 
-setInterval(sendNews, 10000);
+sendNews();
 
 let lastTitle = null;
 let MAX_CAPTION_LENGTH = 1024;
