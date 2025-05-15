@@ -2,13 +2,14 @@ name: Telegram Bot
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '0 5-21 * * *'
   workflow_dispatch:
 
 jobs:
   send_news:
     runs-on: ubuntu-latest
     environment: ENV
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,6 +18,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20.17.0'
+
+      - name: Download previous state
+        uses: actions/download-artifact@v4
+        with:
+          name: state
+          path: .
+        continue-on-error: true
 
       - name: Install dependencies
         run: npm install
@@ -28,3 +36,9 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           NEWS_URL_MOSCOW: ${{ secrets.NEWS_URL_MOSCOW }}
           BASE_NEWS_URL: ${{ secrets.BASE_NEWS_URL }}
+
+      - name: Upload state file
+        uses: actions/upload-artifact@v4
+        with:
+          name: state
+          path: state.json

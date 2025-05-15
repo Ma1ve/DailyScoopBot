@@ -1,17 +1,21 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const path = require('path');
+const fs = require('fs');
+
 const TelegramBot = require('node-telegram-bot-api');
 
 require('dotenv').config();
 
+const statePath = path.resolve(__dirname, 'state.json');
+
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const chatId = process.env.CHAT_ID;
 
-sendNews();
-
-let lastTitle = null;
-let MAX_CAPTION_LENGTH = 1024;
+sendNews().then(() => {
+  console.log('exit');
+  process.exit(0);
+});
 
 async function sendNews() {
   try {
@@ -20,6 +24,15 @@ async function sendNews() {
     if (!newsList || newsList.length === 0) return;
 
     const latestNews = newsList[0];
+
+    let lastTitle = '';
+
+    if (fs.existsSync(statePath)) {
+      const stateData = JSON.parse(fs.readFileSync(statePath, 'utf-8'));
+      lastTitle = stateData.lastTitle;
+    }
+
+    fs.writeFileSync(statePath, JSON.stringify({ lastTitle: latestNews.title }, null, 2), 'utf8');
 
     if (latestNews.title === lastTitle) {
       console.log('Новых новостей нет.');
@@ -58,7 +71,7 @@ async function parseNews() {
 
         if (title && img) {
           const articleText = await parseArticle(relativeUrl);
-
+          console.log(articleText, 'articleText');
           return {
             title,
             image: img,
@@ -123,7 +136,7 @@ function prepareCaption(title, articleText) {
   const MAX_LENGTH = 1024;
   const cleanedText = deleteTabInText(articleText);
 
-  const header = `📰 <b>${title}</b>\n\n`;
+  const header = `<b>${title}</b>\n\n`;
   const remainingLength = MAX_LENGTH - header.length;
 
   let trimmedText = '';
