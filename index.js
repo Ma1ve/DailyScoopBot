@@ -7,7 +7,7 @@ const TelegramBot = require('node-telegram-bot-api');
 
 require('dotenv').config();
 
-const statePath = path.resolve(__dirname, 'state.json');
+const statePath = path.resolve(__dirname, 'cache', 'state.json');
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const chatId = process.env.CHAT_ID;
@@ -21,7 +21,7 @@ async function sendNews() {
   try {
     const newsList = await parseNews();
 
-    if (!newsList || newsList.length === 0) return;
+    if (!newsList || !newsList[0] || newsList.length === 0) return;
 
     const latestNews = newsList[0];
 
@@ -69,10 +69,14 @@ async function parseNews() {
         const relativeUrl = $(el).find('.list__title a').attr('href');
         const img = $(el).find('img.list__pic').attr('data-src');
 
+        if (img.endsWith('526/788/3.jpg')) {
+          return;
+        }
+
         if (title && img) {
           const articleText = await parseArticle(relativeUrl);
-          console.log(articleText, 'articleText');
-          return {
+
+          https: return {
             title,
             image: img,
             articleText,

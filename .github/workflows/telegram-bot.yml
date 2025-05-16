@@ -19,15 +19,15 @@ jobs:
         with:
           node-version: '20.17.0'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Download previous state
         uses: actions/download-artifact@v4
         with:
           name: state
-          path: .
+          path: ./cache
         continue-on-error: true
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Run Telegram Bot
         run: node index.js
@@ -41,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: state
-          path: state.json
+          path: ./cache/state.json
