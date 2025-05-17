@@ -19,15 +19,17 @@ jobs:
         with:
           node-version: '20.17.0'
 
+      - name: Restore state from cache
+        id: restore-cache
+        uses: actions/cache@v4
+        with:
+          path: ./cache
+          key: state-file-${{ github.run_id }}
+          restore-keys: |
+            state-file
+
       - name: Install dependencies
         run: npm install
-
-      - name: Download previous state
-        uses: actions/download-artifact@v4
-        with:
-          name: state
-          path: ./cache
-        continue-on-error: true
 
       - name: Run Telegram Bot
         run: node index.js
@@ -37,8 +39,8 @@ jobs:
           NEWS_URL_MOSCOW: ${{ secrets.NEWS_URL_MOSCOW }}
           BASE_NEWS_URL: ${{ secrets.BASE_NEWS_URL }}
 
-      - name: Upload state file
-        uses: actions/upload-artifact@v4
+      - name: Save state to cache
+        uses: actions/cache@v4
         with:
-          name: state
-          path: ./cache/state.json
+          path: ./cache
+          key: state-file-${{ github.run_id }}
