@@ -44,7 +44,7 @@ async function sendNews() {
     for (const news of newsList) {
       if (!news) continue;
 
-      const message = prepareCaption(news.title, news.articleText);
+      const message = prepareCaption(news.title, news.articleText, news.tags);
 
       await bot.sendPhoto(chatId, news.image, {
         caption: message,
@@ -69,6 +69,25 @@ async function parseNews() {
         const relativeUrl = $(el).find('.list__title a').attr('href');
         const img = $(el).find('img.list__pic').attr('data-src');
 
+        let tags = [];
+        $(el)
+          .find('.list__subtitle')
+          .each((i, elem) => {
+            const text = $(elem).find('.list__src').text().trim();
+            if (text) {
+              tags.push(text);
+            }
+          });
+
+        let res = [];
+
+        $('.list__subtitle').each((i, elem) => {
+          const text = $(elem).find('.list__src').text().trim();
+          if (text && !res.includes(text)) {
+            res.push(text);
+          }
+        });
+
         if (img.endsWith('526/788/3.jpg')) {
           return;
         }
@@ -80,6 +99,7 @@ async function parseNews() {
             title,
             image: img,
             articleText,
+            tags,
           };
         }
       })
@@ -106,6 +126,7 @@ async function parseArticle(relativeUrl) {
     const articleText = $('.article__text').text().trim();
 
     const newArticleText = deleteTabInText(articleText);
+
     return newArticleText;
   } catch (err) {
     console.error('Ошибка при парсинге статьи:', err.message);
@@ -113,8 +134,6 @@ async function parseArticle(relativeUrl) {
 }
 
 function deleteTabInText(text) {
-  console.log(text.length);
-
   const lines = text.split(/\r?\n/);
   let newText = '';
   let currentLength = 0;
@@ -136,25 +155,68 @@ function deleteTabInText(text) {
   return newText.trim();
 }
 
-function prepareCaption(title, articleText) {
+function prepareCaption(title, articleText, tags) {
+  const priorityTags = [
+    { tag: 'происшествия', symbol: '❗️' },
+    { tag: 'главные события', symbol: '📌' },
+    { tag: 'экономика', symbol: '📊' },
+    { tag: 'борьба с коррупцией в россии', symbol: '⚖️' },
+    { tag: 'телефонное мошенничество', symbol: '📱' },
+    { tag: 'политика', symbol: '📑' },
+    { tag: 'авто', symbol: '🚙' },
+    { tag: 'медицина', symbol: '🩺' },
+    { tag: 'культура', symbol: '🎨' },
+    { tag: 'спорт', symbol: '🏋️‍♂️' },
+    { tag: 'прогноз погоды', symbol: '🌦️' },
+    { tag: 'наука', symbol: '🔬' },
+    { tag: 'hi-tech', symbol: '🚀' },
+    { tag: 'общество', symbol: '👥' },
+  ];
+
+  const lowerTags = tags.map((t) => t.toLowerCase());
+  let prefix = '';
+
+  for (const { tag, symbol } of priorityTags) {
+    if (lowerTags.includes(tag)) {
+      prefix = symbol;
+      break;
+    }
+  }
+
   const MAX_LENGTH = 1024;
   const cleanedText = deleteTabInText(articleText);
 
-  const header = `<b>${title}</b>\n\n`;
-  const remainingLength = MAX_LENGTH - header.length;
+  const header = prefix ? `${prefix} <b>${escapeHtml(title)}</b>\n\n` : `<b>${escapeHtml(title)}</b>\n\n`;
+
+  const paragraphs = cleanedText
+    .split('\n')
+    .map((p) => p.trim())
+    .filter((p) => p !== '');
+
+  const firstParagraph = paragraphs[0] || '';
+  const secondParagraph = paragraphs[1] || '';
+  const quotedBlock = `<blockquote>${escapeHtml(firstParagraph)}\n\n${escapeHtml(secondParagraph)}</blockquote>\n\n`;
 
   let trimmedText = '';
-  let totalLength = 0;
+  let totalLength = quotedBlock.length;
 
-  for (let paragraph of cleanedText.split('\n')) {
-    const toAdd = paragraph === '' ? '\n' : '\n' + paragraph;
-    const newLength = totalLength + toAdd.length;
+  for (let i = 2; i < paragraphs.length; i++) {
+    const p = paragraphs[i].trim();
+    if (!p) continue;
 
-    if (newLength > remainingLength) break;
+    const startsWithQuote = /^[“"«'‘]/.test(p);
+    const formatted = startsWithQuote ? `<i>${escapeHtml(p)}</i>\n\n` : `${escapeHtml(p)}\n\n`;
 
-    trimmedText += toAdd;
+    const newLength = totalLength + formatted.length;
+    if (header.length + newLength > MAX_LENGTH) break;
+
+    trimmedText += formatted;
     totalLength = newLength;
   }
 
-  return header + trimmedText.trim();
+  return (header + quotedBlock + trimmedText).trim();
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

@@ -24,9 +24,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cache
-          key: state-file-${{ github.run_id }}
+          key: state-file-${{ hashFiles('index.js') }}
           restore-keys: |
-            state-file
+            state-file-
 
       - name: Install dependencies
         run: npm install
@@ -43,4 +43,4 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./cache
-          key: state-file-${{ github.run_id }}
+          key: state-file-${{ hashFiles('index.js') }}
