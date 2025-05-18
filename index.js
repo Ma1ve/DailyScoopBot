@@ -3,6 +3,8 @@ const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs');
 
+const { rephraseText } = require('./rephraseText');
+
 const TelegramBot = require('node-telegram-bot-api');
 
 require('dotenv').config();
@@ -46,13 +48,18 @@ async function sendNews() {
 
       const message = prepareCaption(news.title, news.articleText, news.tags);
 
+      const rephraseMessage = await rephraseText(message);
+
+      console.log(rephraseMessage, 'rephraseMessage');
+
       await bot.sendPhoto(chatId, news.image, {
-        caption: message,
+        caption: rephraseMessage,
         parse_mode: 'HTML',
       });
     }
   } catch (error) {
     console.error('Ошибка при отправке новостей:', error.message);
+
     await bot.sendMessage(chatId, 'Произошла ошибка при получении новостей.');
   }
 }
@@ -108,7 +115,6 @@ async function parseNews() {
     const data = await Promise.all(promises);
     return data;
   } catch (error) {
-    console.log(error);
     console.error('Ошибка при парсинге:', error.message);
     return [];
   }
@@ -214,7 +220,21 @@ function prepareCaption(title, articleText, tags) {
     totalLength = newLength;
   }
 
-  return (header + quotedBlock + trimmedText).trim();
+  const subscribeLink = `👉 <a href="https://t.me/${process.env.TELEGRAM_CHANNEL}>Подписаться</a>`;
+
+  const formattedTags = tags.map((t) => `#${t.toLowerCase().replace(/\s+/g, '_')}`).join(' ');
+
+  const suffix = `\n\n${subscribeLink}\n\n${formattedTags}`;
+  const captionBody = (header + quotedBlock + trimmedText).trim();
+
+  let finalCaption = captionBody;
+  if (captionBody.length + suffix.length <= MAX_LENGTH) {
+    finalCaption += suffix;
+  } else if (captionBody.length + subscribeLink.length + 2 <= MAX_LENGTH) {
+    finalCaption += `\n\n${subscribeLink}`;
+  }
+
+  return finalCaption.trim();
 }
 
 function escapeHtml(text) {
