@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs');
+const cron = require('node-cron');
 
 const { rephraseText } = require('./rephraseText');
 
@@ -14,10 +15,18 @@ const statePath = path.resolve(__dirname, 'cache', 'state.json');
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const chatId = process.env.CHAT_ID;
 
-sendNews().then(() => {
-  console.log('exit');
-  process.exit(0);
+cron.schedule('0 5-21 * * *', async () => {
+  console.log(new Date().toISOString());
+  try {
+    await sendNews().then(() => {
+      console.log('exit');
+    });
+  } catch (err) {
+    console.error('Ошибка в sendNews():', err);
+  }
 });
+
+console.log('Cron запланирован. Ожидаем выполнения задач...');
 
 async function sendNews() {
   try {
@@ -148,7 +157,6 @@ function deleteTabInText(text) {
     const trimmed = el.trim();
 
     const lineToAdd = trimmed === '' ? '\n' : '\n' + trimmed;
-    console.log(lineToAdd.length, 'lineToAdd.length');
 
     if (currentLength + lineToAdd.length > 1024) {
       break;
