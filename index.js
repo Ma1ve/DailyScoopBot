@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const path = require('path');
 const fs = require('fs');
+const express = require('express');
 const cron = require('node-cron');
 
 const { rephraseText } = require('./rephraseText');
@@ -14,6 +15,19 @@ const statePath = path.resolve(__dirname, 'cache', 'state.json');
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const chatId = process.env.CHAT_ID;
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use((req, res, next) => {
+  const now = new Date().toISOString();
+  console.log(`[${now}] Ping received: ${req.method} ${req.url}`);
+  next();
+});
+
+app.get('/', (req, res) => {
+  res.send('Bot is running!');
+});
 
 cron.schedule('0 5-21 * * *', async () => {
   console.log(new Date().toISOString());
@@ -248,3 +262,7 @@ function prepareCaption(title, articleText, tags) {
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
+});
