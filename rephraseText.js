@@ -22,6 +22,13 @@ async function rephraseText(inputText) {
 
   if (!rawContent) throw new Error('Пустой ответ от модели или неверный формат.');
 
+  let content = rawContent.trim();
+
+  const match = content.match(/^```html\s*([\s\S]*?)```$/);
+  if (match) {
+    content = match[1].trim();
+  }
+
   const cleaned = rawContent.replace(/^\\boxed{([\s\S]*)}$/, '$1');
   return cleaned;
 }
