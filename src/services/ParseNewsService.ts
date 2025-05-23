@@ -10,6 +10,7 @@ interface News {
   image: string;
   articleText: string;
   tags: string[];
+  articleURL: string;
 }
 
 class ParseNewsService {
@@ -36,14 +37,21 @@ class ParseNewsService {
 
   public async parseNews() {
     try {
-      const newsList = await this.getFirstNews();
+      const lastSavedTitle = this.store.loadTitle();
+      const latestNews = await this.getLatestNewsItem(lastSavedTitle);
 
-      if (!newsList || !newsList[0] || newsList.length === 0) return null;
+      if (latestNews === null || latestNews.title === lastSavedTitle) {
+        console.log('Новых новостей нет.');
+        return null;
+      }
 
-      const latestNews = newsList[0];
-      const newsImgAndMessage = this.prepareMessageText(latestNews);
+      const { title, articleText, tags, image } = latestNews;
 
-      return newsImgAndMessage;
+      this.store.saveTitle(title);
+
+      const message = this.prepareCaption(title, articleText, tags);
+
+      return { image, message };
     } catch (error: unknown) {
       const e = error as Error;
       console.error('Ошибка при парсинге новости', e.message);
@@ -52,48 +60,93 @@ class ParseNewsService {
     }
   }
 
-  private async getFirstNews() {
+  private async getLatestNewsItem(lastSavedTitle: string) {
     const response = await axios.get(this.currentNewsUrl);
     const $ = cheerio.load(response.data);
 
-    const promises = $('.list.list-news .list__item')
-      .slice(4, 5)
-      .map(async (_, el) => {
-        const title = $(el).find('.list__title a').text().trim();
-        const relativeUrlToCurrentNews = $(el).find('.list__title a').attr('href');
-        const img = $(el).find('img.list__pic').attr('data-src');
+    const lengthFirstTenBlocks = 10;
+    const stubImgEndPath = '526/788/3.jpg';
 
-        const tags: string[] = [];
-        $(el)
-          .find('.list__subtitle')
-          .each((i, elem) => {
-            const text = $(elem).find('.list__src').text().trim();
-            if (text) {
-              tags.push(text);
-            }
-          });
+    let firstValidNews = null;
+    let importantNews = null;
 
-        const stubImgEndPath = '526/788/3.jpg';
-        if (!img || img.endsWith(stubImgEndPath)) {
-          console.log('Картинка не подгрузилась');
-          return;
-        }
+    const newsItems = $('.list.list-news .list__item');
 
-        if (title && relativeUrlToCurrentNews) {
-          const articleURL = this.baseNewsUrl + relativeUrlToCurrentNews;
-          const articleText = await this.parseArticle(articleURL);
+    for (let i = 0; i < lengthFirstTenBlocks; i++) {
+      const el = newsItems[i];
 
-          https: return {
-            title,
-            image: img,
-            articleText,
-            tags,
-          };
-        }
-      })
-      .get();
+      const title = $(el).find('.list__title a').text().trim();
+      const relativeUrlToCurrentNews = $(el).find('.list__title a').attr('href');
+      const img = $(el).find('img.list__pic').attr('data-src');
 
-    return await Promise.all(promises);
+      if (!img || img.endsWith(stubImgEndPath)) continue;
+
+      const tags: string[] = [];
+      $(el)
+        .find('.list__subtitle')
+        .each((i, elem) => {
+          const text = $(elem).find('.list__src').text().trim();
+          if (text) {
+            tags.push(text);
+          }
+        });
+
+      const newsItem = {
+        title,
+        image: img,
+        articleURL: this.baseNewsUrl + relativeUrlToCurrentNews,
+        tags,
+      };
+
+      // Первый запуск скрипта (lastTitle не сохранился): возвращаем самую первую валидную новость
+      if (lastSavedTitle === '') {
+        const articleText = await this.parseArticle(newsItem.articleURL);
+        return {
+          ...newsItem,
+          articleText,
+        };
+      }
+
+      // Храним первую валидную новость как запасной вариант
+      if (!firstValidNews) {
+        firstValidNews = newsItem;
+      }
+
+      // Проверяем на тег "главные события"
+      if (tags.includes('главные события') && !importantNews) {
+        importantNews = newsItem;
+      }
+
+      // Если дошли до сохранённого заголовка — прекратить обход
+      if (title === lastSavedTitle) {
+        break;
+      }
+    }
+
+    if (!importantNews && !firstValidNews) {
+      console.log('У всех 10 элементов не прогрузились картинки');
+      return null;
+    }
+
+    if (importantNews) {
+      // Если нашли главную новость — отдаем её
+      const articleText = await this.parseArticle(importantNews.articleURL);
+      return {
+        ...importantNews,
+        articleText,
+      };
+    }
+
+    // Иначе — отдаем первую валидную
+    if (firstValidNews) {
+      const articleText = await this.parseArticle(firstValidNews.articleURL);
+      return {
+        ...firstValidNews,
+        articleText,
+      };
+    }
+
+    return null;
   }
 
   private async parseArticle(url: string): Promise<string> {
@@ -132,23 +185,6 @@ class ParseNewsService {
     }
 
     return newText.trim();
-  }
-
-  prepareMessageText(currentNews: News) {
-    const { title, image, articleText, tags } = currentNews;
-
-    let lastTitle = this.store.loadTitle();
-
-    if (title === lastTitle) {
-      console.log('Новых новостей нет.');
-      return null;
-    }
-
-    this.store.saveTitle(title);
-
-    const message = this.prepareCaption(title, articleText, tags);
-
-    return { image, message };
   }
 
   private prepareCaption(title: string, normalizeArticleText: string, tags: string[]) {
