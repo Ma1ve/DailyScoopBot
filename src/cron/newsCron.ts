@@ -11,12 +11,11 @@ export const startNewsCron = () => {
 
   const newsController = new NewsController(telegramBot, parseNewsService, rephraseService);
 
-  cron.schedule('0 5-21 * * *', async () => {
-    console.log(new Date().toISOString());
+  cron.schedule('*/30 5-20 * * *', async () => {
     try {
-      await newsController.sendNews().then(() => {
-        console.log('exit');
-      });
+      await newsController.sendNews();
+
+      console.log(`Новость отправлена: ${new Date().toISOString()}`);
     } catch (err) {
       console.error('Ошибка в sendNews():', err);
     }

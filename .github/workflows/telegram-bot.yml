@@ -37,7 +37,7 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
-          NEWS_URL_MOSCOW: ${{ secrets.NEWS_URL_MOSCOW }}
+          CURRENT_NEWS_URL: ${{ secrets.CURRENT_NEWS_URL }}
           BASE_NEWS_URL: ${{ secrets.BASE_NEWS_URL }}
           OPENROUTER_TOKEN: ${{ secrets.OPENROUTER_TOKEN }}
           MODEL_PROMPT: ${{ secrets.MODEL_PROMPT }}

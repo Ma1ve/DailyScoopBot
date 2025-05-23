@@ -14,21 +14,21 @@ interface News {
 
 class ParseNewsService {
   private baseNewsUrl: string;
-  private baseNewsWithTagMoscowUrl: string;
+  private currentNewsUrl: string;
   private telegramChannelName: string;
   private store: LastNewsTitleStore;
 
   constructor() {
     const baseNewsUrl = process.env.BASE_NEWS_URL;
-    const baseNewsWithTagMoscowUrl = process.env.NEWS_URL_MOSCOW;
+    const currentNewsUrl = process.env.CURRENT_NEWS_URL;
     const telegramChannelName = process.env.TELEGRAM_CHANNEL;
 
     if (!baseNewsUrl) throw new Error('BASE_NEWS_URL is not defined in environment variables.');
-    if (!baseNewsWithTagMoscowUrl) throw new Error('NEWS_URL_MOSCOW is not defined in environment variables.');
+    if (!currentNewsUrl) throw new Error('CURRENT_NEWS_URL is not defined in environment variables.');
     if (!telegramChannelName) throw new Error('TELEGRAM_CHANNEL is not defined in environment variables.');
 
     this.baseNewsUrl = baseNewsUrl;
-    this.baseNewsWithTagMoscowUrl = baseNewsWithTagMoscowUrl;
+    this.currentNewsUrl = currentNewsUrl;
     this.telegramChannelName = telegramChannelName;
 
     this.store = new LastNewsTitleStore();
@@ -53,11 +53,11 @@ class ParseNewsService {
   }
 
   private async getFirstNews() {
-    const response = await axios.get(this.baseNewsWithTagMoscowUrl);
+    const response = await axios.get(this.currentNewsUrl);
     const $ = cheerio.load(response.data);
 
-    const promises = $('.list.list-news.list-tags .list__item')
-      .slice(0, 1)
+    const promises = $('.list.list-news .list__item')
+      .slice(4, 5)
       .map(async (_, el) => {
         const title = $(el).find('.list__title a').text().trim();
         const relativeUrlToCurrentNews = $(el).find('.list__title a').attr('href');
@@ -155,7 +155,7 @@ class ParseNewsService {
     const MAX_LENGTH = 1024;
 
     const prefixSymbol = this.prepareSymbolPrefix(tags);
-    const header = `${prefixSymbol}<b>${this.escapeHtml(title)}</b>\n\n`;
+    const header = `${prefixSymbol} <b>${this.escapeHtml(title)}</b>\n\n`;
 
     const paragraphs = normalizeArticleText
       .split('\n')
@@ -212,20 +212,20 @@ class ParseNewsService {
 
   private prepareSymbolPrefix(tags: string[]) {
     const priorityTags = [
-      { tag: 'телефонное мошенничество', symbol: '📱' },
-      { tag: 'происшествия', symbol: '❗️' },
-      { tag: 'главные события', symbol: '📌' },
+      { tag: 'главные события', symbol: '❗️' },
+      { tag: 'спецоперация россии', symbol: '🪖' },
+      { tag: 'телефонное мошенничество', symbol: '📵' },
       { tag: 'экономика', symbol: '📊' },
       { tag: 'борьба с коррупцией в россии', symbol: '⚖️' },
-      { tag: 'политика', symbol: '📑' },
-      { tag: 'авто', symbol: '🚙' },
+      { tag: 'политика', symbol: '🏛️' },
+      { tag: 'авто', symbol: '🚗' },
       { tag: 'медицина', symbol: '🩺' },
-      { tag: 'культура', symbol: '🎨' },
-      { tag: 'спорт', symbol: '🏋️‍♂️' },
+      { tag: 'культура', symbol: '🎭' },
+      { tag: 'спорт', symbol: '🏅' },
       { tag: 'прогноз погоды', symbol: '🌦️' },
       { tag: 'наука', symbol: '🔬' },
-      { tag: 'hi-tech', symbol: '🚀' },
-      { tag: 'общество', symbol: '👥' },
+      { tag: 'hi-tech', symbol: '🤖' },
+      { tag: 'происшествия', symbol: '🚨' },
     ];
 
     const lowerTags = tags.map((t) => t.toLowerCase());
