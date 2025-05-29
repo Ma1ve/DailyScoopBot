@@ -68,6 +68,8 @@ class RephraseService {
     // Убираем обертку \boxed{...}
     result = result.replace(/^\\boxed{([\s\S]*)}\s*$/, '$1');
 
+    console.log(result, 'result BEFORE REF');
+
     // Убираем Markdown-блоки ```html ... ```
     result = result
       .replace(/^\s*```(?:html)?\s*/i, '')
@@ -76,6 +78,8 @@ class RephraseService {
 
     // Убираем просто "html" в начале, если есть
     result = result.replace(/^html\s*/i, '').trim();
+
+    console.log(result, 'result AFTER REF');
 
     return result;
   }
