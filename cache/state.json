@@ -1,3 +1,16 @@
 {
-  "lastTitle": ""
+  "lastTitleSF": {
+    "criminal": ""
+  },
+  "lastTitleG": {
+    "social": "",
+    "army": "",
+    "science": "",
+    "business": "",
+    "politics": "",
+    "tech": ""
+  },
+  "lastTitleV": {
+    "news": ""
+  }
 }

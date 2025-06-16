@@ -16,10 +16,18 @@ class TelegramBotService {
   }
 
   public async sendMessageToChannel(captionMessage: string, imageUrl: string) {
-    await this.bot.sendPhoto(this.chatId, imageUrl, {
-      caption: captionMessage,
-      parse_mode: 'HTML',
-    });
+    if (!imageUrl) {
+      // Отправляем только текст, если нет картинки
+      await this.bot.sendMessage(this.chatId, captionMessage, {
+        parse_mode: 'HTML',
+      });
+    } else {
+      // Отправляем фото с подписью
+      await this.bot.sendPhoto(this.chatId, imageUrl, {
+        caption: captionMessage,
+        parse_mode: 'HTML',
+      });
+    }
   }
 
   public async sendErrorMessage() {

@@ -7,4 +7,5 @@ dotenv.config();
 const server = new Server();
 
 startNewsCron();
+
 server.start();

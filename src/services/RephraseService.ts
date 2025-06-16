@@ -11,7 +11,8 @@ class RephraseService {
     const envModel = process.env.LLM_MODEL;
 
     if (!prompt) throw new Error('MODEL_PROMPT is not defined in environment variables.');
-    if (!openrouterToken) throw new Error('OPENROUTER_TOKEN is not defined in environment variables.');
+    if (!openrouterToken)
+      throw new Error('OPENROUTER_TOKEN is not defined in environment variables.');
 
     const finalModel = model || envModel;
     if (!finalModel) {
@@ -68,6 +69,8 @@ class RephraseService {
     // Убираем обертку \boxed{...}
     result = result.replace(/^\\boxed{([\s\S]*)}\s*$/, '$1');
 
+    console.log(result, 'result BEFORE REF');
+
     // Убираем Markdown-блоки ```html ... ```
     result = result
       .replace(/^\s*```(?:html)?\s*/i, '')
@@ -76,6 +79,8 @@ class RephraseService {
 
     // Убираем просто "html" в начале, если есть
     result = result.replace(/^html\s*/i, '').trim();
+
+    console.log(result, 'result AFTER REF');
 
     return result;
   }
