@@ -14,7 +14,10 @@ class CaptionPreparerSF extends CaptionPreparer {
 
     const prefixSymbol = this.prepareSymbolPrefix(tags, this.tagEmojiMap);
 
-    return `<b>${prefixSymbol} ${title}</b>\n\n${normalizeArticleText}\n\n${subscribeLink}`;
+    const escapedTitle = this.escapeHtml(title);
+    const escapedArticleText = this.escapeHtml(normalizeArticleText);
+
+    return `<b>${prefixSymbol} ${escapedTitle}</b>\n\n${escapedArticleText}\n\n${subscribeLink}`;
   }
 }
 

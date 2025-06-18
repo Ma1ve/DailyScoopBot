@@ -16,17 +16,22 @@ class TelegramBotService {
   }
 
   public async sendMessageToChannel(captionMessage: string, imageUrl: string) {
-    if (!imageUrl) {
-      // Отправляем только текст, если нет картинки
-      await this.bot.sendMessage(this.chatId, captionMessage, {
-        parse_mode: 'HTML',
-      });
-    } else {
-      // Отправляем фото с подписью
-      await this.bot.sendPhoto(this.chatId, imageUrl, {
-        caption: captionMessage,
-        parse_mode: 'HTML',
-      });
+    try {
+      if (!imageUrl) {
+        // Отправляем только текст, если нет картинки
+        await this.bot.sendMessage(this.chatId, captionMessage, {
+          parse_mode: 'HTML',
+        });
+      } else {
+        // Отправляем фото с подписью
+        await this.bot.sendPhoto(this.chatId, imageUrl, {
+          caption: captionMessage,
+          parse_mode: 'HTML',
+        });
+      }
+    } catch (error: unknown) {
+      const e = error as Error;
+      console.error('Ошибка при отправке сообщения в Telegram:', e.message);
     }
   }
 

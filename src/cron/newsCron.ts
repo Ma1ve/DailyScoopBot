@@ -66,7 +66,7 @@ export const startNewsCron = () => {
   });
 
   const telegramBot = new TelegramBotService();
-  const rephraseService = new RephraseService('deepseek/deepseek-r1-zero:free');
+  const rephraseService = new RephraseService('deepseek/deepseek-r1-0528:free');
 
   const scheduleParsers = [
     { parser: parserScienceNewsG, times: ['09:00', '10:00', '11:00', '14:30', '18:30'] },

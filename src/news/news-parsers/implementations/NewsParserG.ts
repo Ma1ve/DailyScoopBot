@@ -74,25 +74,33 @@ class NewsParserG extends BaseNewsParserService {
   }
 
   protected override async getLatestNewsItem() {
-    const response = await axios.get(this.currentNewsUrl);
-    const $ = cheerio.load(response.data);
+    try {
+      const response = await axios.get(this.currentNewsUrl);
+      const $ = cheerio.load(response.data);
 
-    const firstNewsItem = $('#_id_article_listing').find('a').first();
+      const firstNewsItem = $('#_id_article_listing').find('a').first();
+      const href = firstNewsItem.attr('href');
 
-    const href = firstNewsItem.attr('href');
-    const fullLink = `${this.baseNewsUrl}${href}`;
+      const fullLink = `${this.baseNewsUrl}${href}`;
+      const { articleTitle, articleText, imageUrl } = await this.parseArticle(fullLink);
 
-    const { articleTitle, articleText, imageUrl } = await this.parseArticle(fullLink);
+      if (!articleTitle || !articleText) {
+        console.warn('Нет заголовка или текста статьи');
+        return null;
+      }
 
-    if (!articleTitle || !articleText) return null;
+      return {
+        title: articleTitle,
+        image: imageUrl,
+        articleText: articleText,
+        tags: [],
+        articleURL: '',
+      };
+    } catch (err) {
+      console.error('Ошибка в getLatestNewsItem:', err);
 
-    return {
-      title: articleTitle,
-      image: imageUrl,
-      articleText: articleText,
-      tags: [],
-      articleURL: '',
-    };
+      return null;
+    }
   }
 
   protected override async parseArticle(

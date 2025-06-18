@@ -27,6 +27,7 @@ class RephraseService {
   public async rephraseText(inputText: string): Promise<string> {
     const promptInputText = this.buildPrompt(inputText);
     const content = await this.fetchLLMResponse(promptInputText);
+
     return this.cleanResponse(content);
   }
 
@@ -35,26 +36,32 @@ class RephraseService {
   }
 
   private async fetchLLMResponse(prompt: string): Promise<string> {
-    const { data } = await axios.post(
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        model: this.model,
-        messages: [{ role: 'user', content: prompt }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.openrouterToken}`,
-          'Content-Type': 'application/json',
+    try {
+      const { data } = await axios.post(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          model: this.model,
+          messages: [{ role: 'user', content: prompt }],
         },
-      },
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${this.openrouterToken}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
-    const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) {
-      throw new Error('Пустой ответ от модели или неверный формат.');
+      const content = data.choices?.[0]?.message?.content?.trim();
+      if (!content) {
+        throw new Error('Пустой ответ от модели или неверный формат.');
+      }
+
+      return content;
+    } catch (error: unknown) {
+      const e = error as Error;
+
+      throw new Error(`Ошибка при запросе к LLM: ${e.message}`);
     }
-
-    return content;
   }
 
   private cleanResponse(text: string): string {

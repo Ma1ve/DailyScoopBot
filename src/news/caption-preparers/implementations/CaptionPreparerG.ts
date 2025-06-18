@@ -30,7 +30,10 @@ class CaptionPreparerG extends CaptionPreparer {
 
     const subscribeLink = `⚡️<a href="https://t.me/${this.telegramChannelName}"><b>${this.telegramNameGroup}</b></a>`;
 
-    const cleanedText = this.cleanText(normalizeArticleText);
+    const escapedTitle = this.escapeHtml(title);
+    const escapedArticleText = this.escapeHtml(normalizeArticleText);
+
+    const cleanedText = this.cleanText(escapedArticleText);
 
     const paragraphs = cleanedText.split(/\n{2,}/);
 
@@ -39,7 +42,7 @@ class CaptionPreparerG extends CaptionPreparer {
 
     const prefixSymbol = this.prepareSymbolPrefix(tags, this.tagEmojiMap);
 
-    const header = `<b>${prefixSymbol} ${title}</b>\n\n`;
+    const header = `<b>${prefixSymbol} ${escapedTitle}</b>\n\n`;
     totalLength += header.length;
 
     const subscribeLength = `\n\n${subscribeLink}`.length;
