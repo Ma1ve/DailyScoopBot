@@ -79,6 +79,7 @@ class NewsParserG extends BaseNewsParserService {
       const $ = cheerio.load(response.data);
 
       const firstNewsItem = $('#_id_article_listing').find('a').first();
+
       const href = firstNewsItem.attr('href');
 
       const fullLink = `${this.baseNewsUrl}${href}`;
@@ -112,10 +113,18 @@ class NewsParserG extends BaseNewsParserService {
 
       const articleTitle = $('h1').text().trim();
       const articleText = $('[itemprop="articleBody"]').text().trim();
+      const signplace = $('.signplace').text().trim();
+
       const imageUrl =
         $('img.item-image').attr('data-hq') || $('img.item-image-hq').attr('src') || '';
 
-      return { articleTitle, articleText, imageUrl };
+      function hasCyrillic(text: string): boolean {
+        return /[а-яё]/i.test(text);
+      }
+
+      const currImgageUrl = hasCyrillic(signplace) ? '' : imageUrl;
+
+      return { articleTitle, articleText, imageUrl: currImgageUrl };
     } catch (error: unknown) {
       const e = error as Error;
       console.error('Ошибка при парсинге статьи:', e.message);

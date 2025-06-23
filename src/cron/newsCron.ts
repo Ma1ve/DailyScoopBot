@@ -69,14 +69,15 @@ export const startNewsCron = () => {
   const rephraseService = new RephraseService('deepseek/deepseek-r1-0528:free');
 
   const scheduleParsers = [
-    { parser: parserScienceNewsG, times: ['09:00', '10:00', '11:00', '14:30', '18:30'] },
-    { parser: parserTechNewsG, times: ['09:30', '10:30', '13:00', '16:30', '20:30'] },
-    { parser: parserNewsV, times: ['17:00', '19:00', '21:00'] },
-    { parser: parserCriminalNewsSF, times: ['16:00'] },
-    { parser: parserArmyNewsG, times: ['12:00', '20:00'] },
-    { parser: parserBusinessNewsG, times: ['11:30', '13:30', '15:30'] },
-    { parser: parserPoliticsNewsG, times: ['14:00', '15:00', '17:30'] },
-    { parser: parserSocialNewsG, times: ['12:30', '18:00', '19:30', '21:30', '22:00'] },
+    { parser: parserArmyNewsG, times: ['08:00'] },
+    { parser: parserCriminalNewsSF, times: ['15:00'] },
+    { parser: parserNewsV, times: ['22:30'] },
+
+    { parser: parserTechNewsG, times: ['08:30', '10:30', '12:30', '14:30', '16:30', '18:30'] },
+    { parser: parserPoliticsNewsG, times: ['09:00', '11:00', '13:00', '15:30', '17:30', '19:30'] },
+    { parser: parserBusinessNewsG, times: ['09:30', '11:30', '13:30', '16:00', '18:00', '20:00'] },
+    { parser: parserScienceNewsG, times: ['10:00', '12:00', '14:00', '17:00', '19:00', '21:00'] },
+    { parser: parserSocialNewsG, times: ['20:30', '21:30', '23:00'] },
   ];
 
   cron.schedule('*/30 5-20 * * *', async () => {

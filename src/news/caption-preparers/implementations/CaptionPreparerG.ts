@@ -10,9 +10,9 @@ class CaptionPreparerG extends CaptionPreparer {
     this.tagEmojiMap = [
       { tag: CategoryNewsG.ARMY, symbols: ['🪖', '⚔️', '🛡️'] },
       { tag: CategoryNewsG.BUSINESS, symbols: ['📊', '🪙', '🏦'] },
-      { tag: CategoryNewsG.POLITICS, symbols: ['🏛️', '🌏'] },
-      { tag: CategoryNewsG.SCIENCE, symbols: ['🔬', '⚗️', '👨‍🔬'] },
-      { tag: CategoryNewsG.TECH, symbols: ['👨‍💻', '🖥', '💻'] },
+      { tag: CategoryNewsG.POLITICS, symbols: ['🏛️', '🌏', '📣'] },
+      { tag: CategoryNewsG.SCIENCE, symbols: ['🔬', '⚗️', '👨‍🔬', '🧬'] },
+      { tag: CategoryNewsG.TECH, symbols: ['👨‍💻', '⚙️', '💡'] },
     ];
   }
 
