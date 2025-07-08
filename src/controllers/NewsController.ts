@@ -36,7 +36,8 @@ class NewsController {
       const e = error as Error;
       console.error('Ошибка sendNews при отправке новостей:', e.message);
 
-      this.telegramBot.sendErrorMessage();
+      // Тестовое сообщение об ошибке!
+      // this.telegramBot.sendErrorMessage();
     }
   }
 }
