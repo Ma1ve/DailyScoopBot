@@ -21,6 +21,7 @@ class TelegramBotService {
         // Отправляем только текст, если нет картинки
         await this.bot.sendMessage(this.chatId, captionMessage, {
           parse_mode: 'HTML',
+          disable_web_page_preview: true,
         });
       } else {
         // Отправляем фото с подписью
