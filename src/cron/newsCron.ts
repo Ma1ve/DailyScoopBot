@@ -68,19 +68,17 @@ export const startNewsCron = () => {
   const telegramBot = new TelegramBotService();
   const rephraseService = new RephraseService('deepseek/deepseek-r1-0528:free');
 
+  // TODO: Сделать автоматическое сохранение предыдущих новостей в state.json через env
+  // Добавить parserCriminalNewsSF
   const scheduleParsers = [
-    { parser: parserArmyNewsG, times: ['08:00'] },
-    { parser: parserCriminalNewsSF, times: ['15:00'] },
-    { parser: parserNewsV, times: ['22:30'] },
-
-    { parser: parserTechNewsG, times: ['08:30', '10:30', '12:30', '14:30', '16:30', '18:30', '23:30'] },
-    { parser: parserPoliticsNewsG, times: ['11:00', '17:30', '19:30'] },
-    { parser: parserBusinessNewsG, times: ['11:30', '13:30', '16:00', '18:00', '20:00'] },
-    { parser: parserScienceNewsG, times: ['09:00', '12:00', '14:00', '17:00', '19:00', '20:30', '21:30'] },
-    { parser: parserSocialNewsG, times: ['10:00', '15:30', '22:00', '23:00'] },
+    { parser: parserTechNewsG, times: ['11:00', '15:00', '19:00'] },
+    { parser: parserPoliticsNewsG, times: ['12:00', '18:00'] },
+    { parser: parserScienceNewsG, times: ['9:00', '13:00', '17:00', '21:00'] },
+    { parser: parserSocialNewsG, times: ['10:00', '16:00', '20:00'] },
+    { parser: parserBusinessNewsG, times: ['14:00'] },
   ];
 
-  cron.schedule('*/30 5-20 * * *', async () => {
+  cron.schedule('0 6-18 * * *', async () => {
     try {
       const currentParser = getClosestParserToNow(scheduleParsers);
 

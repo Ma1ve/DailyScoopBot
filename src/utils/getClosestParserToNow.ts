@@ -10,20 +10,19 @@ type NewsParserItem = {
 };
 
 export function getClosestParserToNow(parsers: NewsParserItem[]) {
-  const BLOCKED_TIMES = ['09:30', '13:00', '21:00'];
-
   const moscowNow = DateTime.now().setZone('Europe/Moscow');
   const nowMinutes = moscowNow.hour * 60 + moscowNow.minute;
 
+  // const BLOCKED_TIMES = ['09:30', '13:00', '21:00'];
   // Проверяем, не попадает ли текущее время в заблокированный диапазон ±2 минуты
-  for (const time of BLOCKED_TIMES) {
-    const [h, m] = time.split(':').map(Number);
-    const blockedMinutes = h * 60 + m;
+  // for (const time of BLOCKED_TIMES) {
+  //   const [h, m] = time.split(':').map(Number);
+  //   const blockedMinutes = h * 60 + m;
 
-    if (Math.abs(nowMinutes - blockedMinutes) <= 2) {
-      return null;
-    }
-  }
+  //   if (Math.abs(nowMinutes - blockedMinutes) <= 2) {
+  //     return null;
+  //   }
+  // }
 
   let selectedParser: NewsParserItem | null = null;
   let closestTimeDiff = Number.MAX_SAFE_INTEGER;
