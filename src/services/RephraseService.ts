@@ -11,8 +11,7 @@ class RephraseService {
     const envModel = process.env.LLM_MODEL;
 
     if (!prompt) throw new Error('MODEL_PROMPT is not defined in environment variables.');
-    if (!openrouterToken)
-      throw new Error('OPENROUTER_TOKEN is not defined in environment variables.');
+    if (!openrouterToken) throw new Error('OPENROUTER_TOKEN is not defined in environment variables.');
 
     const finalModel = model || envModel;
     if (!finalModel) {
@@ -82,6 +81,8 @@ class RephraseService {
     result = result
       .replace(/^\s*```(?:html)?\s*/i, '')
       .replace(/\s*```$/, '')
+      /* Удаляем think тег от модели */
+      .replace(/<think>[\s\S]*?<\/think>/g, '')
       .trim();
 
     // Убираем просто "html" в начале, если есть

@@ -78,7 +78,7 @@ export const startNewsCron = () => {
     { parser: parserBusinessNewsG, times: ['14:00'] },
   ];
 
-  cron.schedule('0 6-18 * * *', async () => {
+  cron.schedule('0 5-20 * * *', async () => {
     try {
       const currentParser = getClosestParserToNow(scheduleParsers);
 
